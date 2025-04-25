@@ -26,6 +26,7 @@ import Pricing from "./pages/Pricing";
 import Checkout from "./pages/Checkout";
 import BillingHistory from "./pages/BillingHistory";
 import PrivateRoute from "./components/PrivateRoute";
+import Onboarding from "./pages/Onboarding";
 
 const App = () => {
   // Create a client for React Query
@@ -46,6 +47,7 @@ const App = () => {
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/onboarding" element={<PrivateRoute><Onboarding /></PrivateRoute>} />
                   
                   {/* Protected routes */}
                   <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />

@@ -1,5 +1,5 @@
 
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Loader } from "lucide-react";
 
@@ -8,8 +8,12 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute = ({ children }: PrivateRouteProps) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const location = useLocation();
 
+  // Páginas que não devem redirecionar para onboarding
+  const excludeFromOnboarding = ["/onboarding"];
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -23,6 +27,14 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+  
+  // Redirecionar para onboarding se for um novo usuário
+  // e não estiver em uma página excluída do redirecionamento
+  const needsOnboarding = !user.company && !excludeFromOnboarding.includes(location.pathname);
+  
+  if (needsOnboarding) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <>{children}</>;
