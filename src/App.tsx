@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -14,7 +14,7 @@ import BotDetails from "./pages/BotDetails";
 import NotFound from "./pages/NotFound";
 import { BotCreationWizard } from "./components/BotCreationWizard";
 import { BotProvider } from "./context/BotContext";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import { SubscriptionProvider } from "./context/SubscriptionContext";
 import ChatInterface from "./pages/ChatInterface";
 import BotAnalytics from "./pages/BotAnalytics";
@@ -33,13 +33,13 @@ const App = () => {
   
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <SubscriptionProvider>
-              <BotProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <SubscriptionProvider>
+            <BotProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<Index />} />
@@ -67,11 +67,11 @@ const App = () => {
                   {/* Catch-all route */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </BotProvider>
-            </SubscriptionProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+              </TooltipProvider>
+            </BotProvider>
+          </SubscriptionProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 };
