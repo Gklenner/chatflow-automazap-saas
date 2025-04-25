@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,13 +10,30 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Bot, Check, Upload } from "lucide-react";
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  Bot, 
+  Check, 
+  Upload, 
+  MessageSquare,
+  Globe,
+  Clock
+} from "lucide-react";
 import { useBots } from "@/context/BotContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { BotCreationData } from "@/types/bot";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Step = "info" | "knowledge" | "connection" | "complete";
+type Step = "info" | "knowledge" | "personalization" | "connection" | "complete";
 
 export const BotCreationWizard = () => {
   const [step, setStep] = useState<Step>("info");
@@ -25,6 +41,10 @@ export const BotCreationWizard = () => {
   const [botDescription, setBotDescription] = useState("");
   const [personality, setPersonality] = useState<"Formal" | "Amigável" | "Divertido">("Amigável");
   const [knowledgeSource, setKnowledgeSource] = useState<"files" | "conversation">("files");
+  const [welcomeMessage, setWelcomeMessage] = useState("");
+  const [language, setLanguage] = useState<"pt-BR" | "en-US" | "es-ES">("pt-BR");
+  const [responseTime, setResponseTime] = useState<"Rápido" | "Normal" | "Detalhado">("Normal");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   
   const { createBot } = useBots();
   const navigate = useNavigate();
@@ -37,13 +57,19 @@ export const BotCreationWizard = () => {
       }
       setStep("knowledge");
     } else if (step === "knowledge") {
+      setStep("personalization");
+    } else if (step === "personalization") {
       setStep("connection");
     } else if (step === "connection") {
       const botData: BotCreationData = {
         name: botName,
         description: botDescription,
         personality: personality,
-        knowledgeSource: knowledgeSource
+        knowledgeSource: knowledgeSource,
+        welcomeMessage: welcomeMessage,
+        language: language,
+        responseTime: responseTime,
+        avatar: avatarPreview || undefined
       };
       createBot(botData);
       setStep("complete");
@@ -53,8 +79,10 @@ export const BotCreationWizard = () => {
   const goToPreviousStep = () => {
     if (step === "knowledge") {
       setStep("info");
-    } else if (step === "connection") {
+    } else if (step === "personalization") {
       setStep("knowledge");
+    } else if (step === "connection") {
+      setStep("personalization");
     }
   };
 
@@ -70,6 +98,23 @@ export const BotCreationWizard = () => {
     navigate("/dashboard");
   };
 
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("O arquivo é muito grande. O tamanho máximo é 5MB.");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      toast.success("Avatar carregado com sucesso!");
+    }
+  };
+
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
@@ -81,34 +126,34 @@ export const BotCreationWizard = () => {
       <CardContent>
         {/* Step progress indicator */}
         <div className="flex mb-8">
-          {["Informações", "Conhecimento", "Conexão", "Concluído"].map((stepName, index) => (
+          {["Informações", "Conhecimento", "Personalização", "Conexão", "Concluído"].map((stepName, index) => (
             <div key={index} className="flex-1">
               <div className="relative flex items-center justify-center">
                 <div 
                   className={`w-10 h-10 rounded-full flex items-center justify-center z-10 
-                    ${index === ["info", "knowledge", "connection", "complete"].indexOf(step) 
+                    ${index === ["info", "knowledge", "personalization", "connection", "complete"].indexOf(step) 
                       ? "bg-automazap-600 text-white" 
-                      : index < ["info", "knowledge", "connection", "complete"].indexOf(step) 
+                      : index < ["info", "knowledge", "personalization", "connection", "complete"].indexOf(step) 
                         ? "bg-green-500 text-white" 
                         : "bg-gray-200 text-gray-500"}`}
                 >
-                  {index < ["info", "knowledge", "connection", "complete"].indexOf(step) ? (
+                  {index < ["info", "knowledge", "personalization", "connection", "complete"].indexOf(step) ? (
                     <Check className="h-5 w-5" />
                   ) : (
                     <span>{index + 1}</span>
                   )}
                 </div>
-                {index < 3 && (
+                {index < 4 && (
                   <div 
                     className={`absolute top-5 w-full h-0.5 left-1/2 
-                      ${index < ["info", "knowledge", "connection", "complete"].indexOf(step) 
+                      ${index < ["info", "knowledge", "personalization", "connection", "complete"].indexOf(step) 
                         ? "bg-green-500" 
                         : "bg-gray-200"}`}
                   />
                 )}
               </div>
               <div className="text-center mt-2 text-sm">
-                <span className={index <= ["info", "knowledge", "connection", "complete"].indexOf(step) 
+                <span className={index <= ["info", "knowledge", "personalization", "connection", "complete"].indexOf(step) 
                   ? "text-automazap-600 font-medium" 
                   : "text-gray-500"}
                 >
@@ -214,6 +259,121 @@ export const BotCreationWizard = () => {
                 </Button>
               </div>
             </div>
+          </div>
+        )}
+
+        {step === "personalization" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-center mb-6">
+              <div 
+                className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative cursor-pointer"
+                onClick={() => document.getElementById('avatar-upload')?.click()}
+              >
+                {avatarPreview ? (
+                  <img 
+                    src={avatarPreview} 
+                    alt="Avatar Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Bot className="h-8 w-8 text-gray-400" />
+                )}
+                <input 
+                  type="file" 
+                  id="avatar-upload" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Upload className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+
+            <Tabs defaultValue="welcome" className="w-full">
+              <TabsList className="grid grid-cols-3 mb-4">
+                <TabsTrigger value="welcome">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Mensagem
+                </TabsTrigger>
+                <TabsTrigger value="language">
+                  <Globe className="h-4 w-4 mr-2" />
+                  Idioma
+                </TabsTrigger>
+                <TabsTrigger value="response">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Resposta
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="welcome" className="space-y-4">
+                <div>
+                  <label htmlFor="welcomeMessage" className="block text-sm font-medium mb-1">
+                    Mensagem de Boas-vindas
+                  </label>
+                  <Textarea
+                    id="welcomeMessage"
+                    placeholder={`Olá! Sou o ${botName || 'Assistente'}, como posso ajudar?`}
+                    value={welcomeMessage}
+                    onChange={(e) => setWelcomeMessage(e.target.value)}
+                    rows={3}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Esta mensagem será enviada quando alguém iniciar uma conversa com seu bot.
+                  </p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="language" className="space-y-4">
+                <div>
+                  <label htmlFor="language" className="block text-sm font-medium mb-1">
+                    Idioma Principal
+                  </label>
+                  <Select value={language} onValueChange={(value) => setLanguage(value as "pt-BR" | "en-US" | "es-ES")}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Escolha o idioma" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
+                      <SelectItem value="en-US">Inglês (EUA)</SelectItem>
+                      <SelectItem value="es-ES">Espanhol</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    O bot será otimizado para responder neste idioma.
+                  </p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="response" className="space-y-4">
+                <div>
+                  <label htmlFor="responseTime" className="block text-sm font-medium mb-1">
+                    Tempo de Resposta
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {["Rápido", "Normal", "Detalhado"].map((responseTipo) => (
+                      <div 
+                        key={responseTipo}
+                        className={`border rounded-lg p-3 text-center cursor-pointer hover:border-automazap-300 hover:bg-automazap-50 ${
+                          responseTime === responseTipo ? "border-automazap-500 bg-automazap-50" : ""
+                        }`}
+                        onClick={() => setResponseTime(responseTipo as "Rápido" | "Normal" | "Detalhado")}
+                      >
+                        {responseTipo}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-500">
+                      {responseTime === "Rápido" && "Respostas curtas e diretas para atendimento ágil."}
+                      {responseTime === "Normal" && "Equilíbrio entre tempo e qualidade de resposta."}
+                      {responseTime === "Detalhado" && "Respostas completas e detalhadas para máximo suporte."}
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
 

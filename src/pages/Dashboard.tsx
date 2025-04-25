@@ -105,8 +105,12 @@ const Dashboard = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-automazap-500 flex items-center justify-center text-white mr-3">
-                        <Bot className="h-6 w-6" />
+                      <div className="h-10 w-10 rounded-full bg-automazap-500 flex items-center justify-center text-white mr-3 overflow-hidden">
+                        {bot.avatar ? (
+                          <img src={bot.avatar} alt={bot.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <Bot className="h-6 w-6" />
+                        )}
                       </div>
                       <div>
                         <CardTitle>{bot.name}</CardTitle>
@@ -131,6 +135,14 @@ const Dashboard = () => {
                         <span className="text-gray-500">Usuários:</span>
                         <span className="ml-1 font-semibold">{bot.stats.users}</span>
                       </div>
+                      <div>
+                        <span className="text-gray-500">Idioma:</span>
+                        <span className="ml-1 font-semibold">
+                          {bot.language === "pt-BR" ? "Português" : 
+                           bot.language === "en-US" ? "Inglês" : 
+                           bot.language === "es-ES" ? "Espanhol" : "Não definido"}
+                        </span>
+                      </div>
                     </div>
                     <div className="text-automazap-600">
                       +12% na última semana
@@ -139,11 +151,11 @@ const Dashboard = () => {
                 </CardContent>
                 <CardFooter className="flex justify-between">
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => navigate('/bot/details')}>
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/bot/details/${bot.id}`)}>
                       <MessageSquare className="h-4 w-4 mr-1" />
                       <span>Detalhes</span>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => navigate('/bot/training')}>
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/bot/training/${bot.id}`)}>
                       <Settings className="h-4 w-4 mr-1" />
                       <span>Treinar</span>
                     </Button>
