@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Plus, MessageSquare, Bot, Settings, Users, BarChart } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [botName, setBotName] = useState("");
+  const navigate = useNavigate();
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -47,7 +49,7 @@ const Dashboard = () => {
             <p className="text-gray-600">Gerencie seus bots e visualize estatísticas</p>
           </div>
           <div className="mt-4 lg:mt-0">
-            <Button className="gradient-bg">
+            <Button className="gradient-bg" onClick={() => navigate('/bot/create')}>
               <Plus className="h-5 w-5 mr-1" />
               <span>Criar Novo Bot</span>
             </Button>
@@ -86,7 +88,7 @@ const Dashboard = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="w-full gradient-bg">
+                <Button className="w-full gradient-bg" onClick={() => navigate('/bot/create')}>
                   <Bot className="h-5 w-5 mr-1" />
                   <span>Criar Bot</span>
                 </Button>
@@ -129,13 +131,13 @@ const Dashboard = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => navigate('/bot/details')}>
                   <MessageSquare className="h-4 w-4 mr-1" />
-                  <span>Conversar</span>
+                  <span>Detalhes</span>
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => navigate('/bot/training')}>
                   <Settings className="h-4 w-4 mr-1" />
-                  <span>Configurar</span>
+                  <span>Treinar</span>
                 </Button>
               </CardFooter>
             </Card>
