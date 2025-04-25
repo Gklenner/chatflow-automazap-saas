@@ -9,6 +9,7 @@ interface BotContextProps {
   createBot: (data: BotCreationData) => void;
   deleteBot: (id: string) => void;
   getBot: (id: string) => Bot | undefined;
+  updateBot: (id: string, data: Partial<Bot>) => void;
 }
 
 const BotContext = createContext<BotContextProps | undefined>(undefined);
@@ -38,7 +39,10 @@ export const BotProvider = ({ children }: BotProviderProps) => {
       stats: {
         messages: 245,
         users: 18
-      }
+      },
+      welcomeMessage: "Olá! Como posso ajudar com suas dúvidas sobre nossos produtos?",
+      language: "pt-BR",
+      responseTime: "Normal"
     }
   ]);
 
@@ -55,7 +59,11 @@ export const BotProvider = ({ children }: BotProviderProps) => {
       stats: {
         messages: 0,
         users: 0
-      }
+      },
+      welcomeMessage: data.welcomeMessage || `Olá! Sou o ${data.name}, como posso ajudar?`,
+      language: data.language || "pt-BR",
+      responseTime: data.responseTime || "Normal",
+      avatar: data.avatar
     };
 
     setBots([...bots, newBot]);
@@ -72,8 +80,20 @@ export const BotProvider = ({ children }: BotProviderProps) => {
     return bots.find(bot => bot.id === id);
   };
 
+  const updateBot = (id: string, data: Partial<Bot>) => {
+    const botIndex = bots.findIndex(bot => bot.id === id);
+    if (botIndex !== -1) {
+      const updatedBots = [...bots];
+      updatedBots[botIndex] = { ...updatedBots[botIndex], ...data };
+      setBots(updatedBots);
+      toast.success("Bot atualizado com sucesso!");
+    } else {
+      toast.error("Bot não encontrado!");
+    }
+  };
+
   return (
-    <BotContext.Provider value={{ bots, createBot, deleteBot, getBot }}>
+    <BotContext.Provider value={{ bots, createBot, deleteBot, getBot, updateBot }}>
       {children}
     </BotContext.Provider>
   );

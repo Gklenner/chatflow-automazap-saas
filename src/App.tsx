@@ -32,7 +32,9 @@ const App = () => {
               <Route path="/signup" element={<Signup />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/bot/training" element={<BotTraining />} />
+              <Route path="/bot/training/:botId" element={<BotTraining />} />
               <Route path="/bot/details" element={<BotDetails />} />
+              <Route path="/bot/details/:botId" element={<BotDetails />} />
               <Route path="/bot/create" element={<div className="p-8"><BotCreationWizard /></div>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
