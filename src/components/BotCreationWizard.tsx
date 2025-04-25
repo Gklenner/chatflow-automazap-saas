@@ -12,6 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight, Bot, Check, Upload } from "lucide-react";
+import { useBots } from "@/context/BotContext";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { BotCreationData } from "@/types/bot";
 
 type Step = "info" | "knowledge" | "connection" | "complete";
 
@@ -19,34 +23,51 @@ export const BotCreationWizard = () => {
   const [step, setStep] = useState<Step>("info");
   const [botName, setBotName] = useState("");
   const [botDescription, setBotDescription] = useState("");
+  const [personality, setPersonality] = useState<"Formal" | "Amigável" | "Divertido">("Amigável");
+  const [knowledgeSource, setKnowledgeSource] = useState<"files" | "conversation">("files");
+  
+  const { createBot } = useBots();
+  const navigate = useNavigate();
 
   const goToNextStep = () => {
-    switch (step) {
-      case "info":
-        setStep("knowledge");
-        break;
-      case "knowledge":
-        setStep("connection");
-        break;
-      case "connection":
-        setStep("complete");
-        break;
-      default:
-        break;
+    if (step === "info") {
+      if (!botName.trim()) {
+        toast.error("Por favor, insira um nome para o bot.");
+        return;
+      }
+      setStep("knowledge");
+    } else if (step === "knowledge") {
+      setStep("connection");
+    } else if (step === "connection") {
+      const botData: BotCreationData = {
+        name: botName,
+        description: botDescription,
+        personality: personality,
+        knowledgeSource: knowledgeSource
+      };
+      createBot(botData);
+      setStep("complete");
     }
   };
 
   const goToPreviousStep = () => {
-    switch (step) {
-      case "knowledge":
-        setStep("info");
-        break;
-      case "connection":
-        setStep("knowledge");
-        break;
-      default:
-        break;
+    if (step === "knowledge") {
+      setStep("info");
+    } else if (step === "connection") {
+      setStep("knowledge");
     }
+  };
+
+  const handlePersonalitySelect = (selected: "Formal" | "Amigável" | "Divertido") => {
+    setPersonality(selected);
+  };
+
+  const handleKnowledgeSourceSelect = (source: "files" | "conversation") => {
+    setKnowledgeSource(source);
+  };
+
+  const handleComplete = () => {
+    navigate("/dashboard");
   };
 
   return (
@@ -129,12 +150,15 @@ export const BotCreationWizard = () => {
                 Personalidade
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {["Formal", "Amigável", "Divertido"].map((personality) => (
+                {["Formal", "Amigável", "Divertido"].map((personalityType) => (
                   <div 
-                    key={personality}
-                    className="border rounded-lg p-3 text-center cursor-pointer hover:border-automazap-300 hover:bg-automazap-50"
+                    key={personalityType}
+                    className={`border rounded-lg p-3 text-center cursor-pointer hover:border-automazap-300 hover:bg-automazap-50 ${
+                      personality === personalityType ? "border-automazap-500 bg-automazap-50" : ""
+                    }`}
+                    onClick={() => handlePersonalitySelect(personalityType as "Formal" | "Amigável" | "Divertido")}
                   >
-                    {personality}
+                    {personalityType}
                   </div>
                 ))}
               </div>
@@ -147,7 +171,12 @@ export const BotCreationWizard = () => {
             <div>
               <h3 className="font-medium mb-2">Como seu bot aprenderá?</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border rounded-lg p-4 cursor-pointer hover:border-automazap-300 hover:bg-automazap-50">
+                <div 
+                  className={`border rounded-lg p-4 cursor-pointer hover:border-automazap-300 hover:bg-automazap-50 ${
+                    knowledgeSource === "files" ? "border-automazap-500 bg-automazap-50" : ""
+                  }`}
+                  onClick={() => handleKnowledgeSourceSelect("files")}
+                >
                   <div className="flex flex-col items-center text-center">
                     <Upload className="h-8 w-8 text-automazap-600 mb-2" />
                     <h4 className="font-medium">Enviar arquivos</h4>
@@ -156,7 +185,12 @@ export const BotCreationWizard = () => {
                     </p>
                   </div>
                 </div>
-                <div className="border rounded-lg p-4 cursor-pointer hover:border-automazap-300 hover:bg-automazap-50">
+                <div 
+                  className={`border rounded-lg p-4 cursor-pointer hover:border-automazap-300 hover:bg-automazap-50 ${
+                    knowledgeSource === "conversation" ? "border-automazap-500 bg-automazap-50" : ""
+                  }`}
+                  onClick={() => handleKnowledgeSourceSelect("conversation")}
+                >
                   <div className="flex flex-col items-center text-center">
                     <Bot className="h-8 w-8 text-automazap-600 mb-2" />
                     <h4 className="font-medium">Conversar com o bot</h4>
@@ -253,10 +287,10 @@ export const BotCreationWizard = () => {
               ou personalizá-lo ainda mais.
             </p>
             <div className="flex justify-center space-x-4">
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => navigate("/bot/details")}>
                 Personalizar Bot
               </Button>
-              <Button className="gradient-bg">
+              <Button className="gradient-bg" onClick={handleComplete}>
                 Começar a Conversar
               </Button>
             </div>

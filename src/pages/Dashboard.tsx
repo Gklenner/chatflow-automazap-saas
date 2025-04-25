@@ -2,14 +2,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, MessageSquare, Bot, Settings, Users, BarChart } from "lucide-react";
+import { Plus, MessageSquare, Bot, Settings, Users, BarChart, Trash } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { useBots } from "@/context/BotContext";
 
 const Dashboard = () => {
   const [botName, setBotName] = useState("");
   const navigate = useNavigate();
+  const { bots, deleteBot } = useBots();
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -66,81 +68,93 @@ const Dashboard = () => {
 
           {/* Bots Tab */}
           <TabsContent value="bots" className="space-y-6">
-            {/* Create Bot Card */}
-            <Card className="border-dashed border-2 border-gray-300 bg-white">
-              <CardHeader>
-                <CardTitle>Crie seu primeiro bot</CardTitle>
-                <CardDescription>Configure um novo chatbot para WhatsApp em poucos minutos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="botName" className="block text-sm font-medium text-gray-700 mb-1">
-                      Nome do bot
-                    </label>
-                    <Input
-                      id="botName"
-                      placeholder="Ex: Atendente Virtual"
-                      value={botName}
-                      onChange={(e) => setBotName(e.target.value)}
-                    />
+            {/* Show Create Bot Card only if there are no bots */}
+            {bots.length === 0 ? (
+              <Card className="border-dashed border-2 border-gray-300 bg-white">
+                <CardHeader>
+                  <CardTitle>Crie seu primeiro bot</CardTitle>
+                  <CardDescription>Configure um novo chatbot para WhatsApp em poucos minutos</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="botName" className="block text-sm font-medium text-gray-700 mb-1">
+                        Nome do bot
+                      </label>
+                      <Input
+                        id="botName"
+                        placeholder="Ex: Atendente Virtual"
+                        value={botName}
+                        onChange={(e) => setBotName(e.target.value)}
+                      />
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full gradient-bg" onClick={() => navigate('/bot/create')}>
-                  <Bot className="h-5 w-5 mr-1" />
-                  <span>Criar Bot</span>
-                </Button>
-              </CardFooter>
-            </Card>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full gradient-bg" onClick={() => navigate('/bot/create')}>
+                    <Bot className="h-5 w-5 mr-1" />
+                    <span>Criar Bot</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ) : null}
 
-            {/* Example Bot Card */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 rounded-full bg-automazap-500 flex items-center justify-center text-white mr-3">
-                      <Bot className="h-6 w-6" />
+            {/* List of bots */}
+            {bots.map((bot) => (
+              <Card key={bot.id}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 rounded-full bg-automazap-500 flex items-center justify-center text-white mr-3">
+                        <Bot className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <CardTitle>{bot.name}</CardTitle>
+                        <CardDescription>
+                          Criado em {bot.createdAt.toLocaleDateString('pt-BR')}
+                        </CardDescription>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle>Assistente de Vendas</CardTitle>
-                      <CardDescription>Criado em 23/04/2025</CardDescription>
-                    </div>
-                  </div>
-                  <div className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full">
-                    Ativo
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-3">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex space-x-4">
-                    <div>
-                      <span className="text-gray-500">Mensagens:</span>
-                      <span className="ml-1 font-semibold">245</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Usuários:</span>
-                      <span className="ml-1 font-semibold">18</span>
+                    <div className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full">
+                      Ativo
                     </div>
                   </div>
-                  <div className="text-automazap-600">
-                    +12% na última semana
+                </CardHeader>
+                <CardContent className="pb-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex space-x-4">
+                      <div>
+                        <span className="text-gray-500">Mensagens:</span>
+                        <span className="ml-1 font-semibold">{bot.stats.messages}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Usuários:</span>
+                        <span className="ml-1 font-semibold">{bot.stats.users}</span>
+                      </div>
+                    </div>
+                    <div className="text-automazap-600">
+                      +12% na última semana
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" size="sm" onClick={() => navigate('/bot/details')}>
-                  <MessageSquare className="h-4 w-4 mr-1" />
-                  <span>Detalhes</span>
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate('/bot/training')}>
-                  <Settings className="h-4 w-4 mr-1" />
-                  <span>Treinar</span>
-                </Button>
-              </CardFooter>
-            </Card>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => navigate('/bot/details')}>
+                      <MessageSquare className="h-4 w-4 mr-1" />
+                      <span>Detalhes</span>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => navigate('/bot/training')}>
+                      <Settings className="h-4 w-4 mr-1" />
+                      <span>Treinar</span>
+                    </Button>
+                  </div>
+                  <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50" onClick={() => deleteBot(bot.id)}>
+                    <Trash className="h-4 w-4 mr-1" />
+                    <span>Excluir</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
           </TabsContent>
 
           {/* Stats Tab */}

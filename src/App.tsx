@@ -13,6 +13,7 @@ import BotTraining from "./pages/BotTraining";
 import BotDetails from "./pages/BotDetails";
 import NotFound from "./pages/NotFound";
 import { BotCreationWizard } from "./components/BotCreationWizard";
+import { BotProvider } from "./context/BotContext";
 
 const App = () => {
   // Create a client for React Query
@@ -24,17 +25,19 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/bot/training" element={<BotTraining />} />
-            <Route path="/bot/details" element={<BotDetails />} />
-            <Route path="/bot/create" element={<div className="p-8"><BotCreationWizard /></div>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <BotProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/bot/training" element={<BotTraining />} />
+              <Route path="/bot/details" element={<BotDetails />} />
+              <Route path="/bot/create" element={<div className="p-8"><BotCreationWizard /></div>} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BotProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
