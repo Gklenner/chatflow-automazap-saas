@@ -8,7 +8,9 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import BotTraining from "./pages/BotTraining";
 import NotFound from "./pages/NotFound";
+import { BotCreationWizard } from "./components/BotCreationWizard";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/bot/training" element={<BotTraining />} />
+          <Route path="/bot/create" element={<div className="p-8"><BotCreationWizard /></div>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
