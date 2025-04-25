@@ -1,15 +1,34 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { Loader } from "lucide-react";
 
 const Signup = () => {
-  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [error, setError] = useState("");
+  const { signup, isLoading } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock signup functionality - would connect to Supabase in a real implementation
-    navigate("/dashboard");
+    setError("");
+    
+    if (password !== confirmPassword) {
+      setError("As senhas não coincidem");
+      return;
+    }
+    
+    if (!termsAccepted) {
+      setError("Você precisa aceitar os Termos de Serviço e Política de Privacidade");
+      return;
+    }
+    
+    await signup(email, password, name);
   };
 
   return (
@@ -28,6 +47,12 @@ const Signup = () => {
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+        
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -41,6 +66,9 @@ const Signup = () => {
                 required
                 className="mt-1"
                 placeholder="Seu nome"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -55,6 +83,9 @@ const Signup = () => {
                 required
                 className="mt-1"
                 placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -68,6 +99,9 @@ const Signup = () => {
                 autoComplete="new-password"
                 required
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -81,6 +115,9 @@ const Signup = () => {
                 autoComplete="new-password"
                 required
                 placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -92,6 +129,9 @@ const Signup = () => {
               type="checkbox"
               required
               className="h-4 w-4 text-automazap-600 focus:ring-automazap-500 border-gray-300 rounded"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              disabled={isLoading}
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
               Concordo com os{" "}
@@ -106,8 +146,19 @@ const Signup = () => {
           </div>
 
           <div>
-            <Button type="submit" className="gradient-bg w-full">
-              Criar conta
+            <Button 
+              type="submit" 
+              className="gradient-bg w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center">
+                  <Loader className="animate-spin mr-2 h-4 w-4" />
+                  <span>Criando conta...</span>
+                </div>
+              ) : (
+                "Criar conta"
+              )}
             </Button>
           </div>
         </form>

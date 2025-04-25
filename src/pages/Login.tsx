@@ -1,15 +1,20 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login functionality - would connect to Supabase in a real implementation
-    navigate("/dashboard");
+    await login(email, password);
   };
 
   return (
@@ -41,6 +46,9 @@ const Login = () => {
                 required
                 className="mt-1"
                 placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div>
@@ -54,6 +62,9 @@ const Login = () => {
                 autoComplete="current-password"
                 required
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -79,8 +90,15 @@ const Login = () => {
           </div>
 
           <div>
-            <Button type="submit" className="gradient-bg w-full">
-              Entrar
+            <Button type="submit" className="gradient-bg w-full" disabled={isLoading}>
+              {isLoading ? (
+                <div className="flex items-center">
+                  <Loader className="animate-spin mr-2 h-4 w-4" />
+                  <span>Entrando...</span>
+                </div>
+              ) : (
+                "Entrar"
+              )}
             </Button>
           </div>
         </form>
@@ -93,6 +111,13 @@ const Login = () => {
           >
             Cadastre-se
           </a>
+        </div>
+
+        {/* Demo account info */}
+        <div className="mt-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+          <p className="text-sm text-blue-800 font-medium">Conta para demonstração:</p>
+          <p className="text-sm text-blue-700 mt-1">Email: demo@example.com</p>
+          <p className="text-sm text-blue-700">Senha: qualquer senha funciona</p>
         </div>
       </div>
     </div>
